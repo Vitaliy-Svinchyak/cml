@@ -1,4 +1,3 @@
-block width:3pt height:2pt row:1 col:1
-    "Registration form"
-block width:50% height:50% row:1 col:4 border:1pt border-color:red
+block width:3pt height:2pt row:1 col:1 id:reg_title text:"Registration form"
+block width:50% height:50% row:1 col:4 id:just_some_block
     block width:100% height:1pt
