@@ -1,3 +1,3 @@
-block width:25pt,height:2pt,row:1,col:1,id:reg_title,border:1,text:"Registration form"
+block width:25pt height:2pt row:1 col:1 id:reg_title border:1 text:"Registration form"
 
-block width:45pt,height:4pt,row:3,col:40,id:reg_title2,border:1,text:"Some another text"
+block width:45pt height:4pt row:3 col:40 id:reg_title2 border:1 text:"Some another text"

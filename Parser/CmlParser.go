@@ -5,7 +5,6 @@ import (
 	"strings"
 	"strconv"
 	"reflect"
-	//"fmt"
 )
 
 func ParseString(cml string) []*BlockTypes.Block {
@@ -21,10 +20,8 @@ func ParseString(cml string) []*BlockTypes.Block {
 			continue
 		}
 		var nesting, row = detectNesting(row)
-		var rowParameters = strings.Split(row, ",")
-		var typeAndFirstParam = strings.Split(rowParameters[0], " ")
-		rowParameters[0] = typeAndFirstParam[1]
-		var blockType = typeAndFirstParam[0]
+		var rowParameters = getRowParameters(row)
+		var blockType = rowParameters[0]
 		var knownType, _ = inArray(blockType, knownTypes)
 		if !knownType {
 			panic("Unknown block type: " + blockType + " on line " + strconv.Itoa(rowNumber))
@@ -45,6 +42,38 @@ func ParseString(cml string) []*BlockTypes.Block {
 	}
 
 	return cmlTree
+}
+
+func getRowParameters(row string) []string {
+	var params = strings.Split(row, " ")
+	var formattedParams []string
+	var concattedText string
+
+	for _, param := range params {
+		var propertySplitted = strings.Split(param, ":")
+		if propertySplitted[0] == "text" {
+			var lastSymbol = propertySplitted[1][len(propertySplitted[1])-1]
+			if lastSymbol != 34 {
+				concattedText = param + " "
+				continue
+			}
+		}
+
+		if len(concattedText) == 0 {
+			formattedParams = append(formattedParams, param)
+		} else {
+			var lastSymbol = param[len(param)-1]
+			if lastSymbol == 34 {
+				concattedText += param
+				formattedParams = append(formattedParams, concattedText)
+				concattedText = ""
+			} else {
+				concattedText += param + " "
+			}
+		}
+	}
+
+	return formattedParams
 }
 
 func parseProperties(properties []string, rowNumber int) *BlockTypes.Block {
@@ -75,7 +104,7 @@ func parseProperties(properties []string, rowNumber int) *BlockTypes.Block {
 				block.SetCol(col)
 				break
 			case "text":
-				block.SetText(string([]rune(propertyValue)[1:len(propertyValue) - 1]))
+				block.SetText(string([]rune(propertyValue)[1:len(propertyValue)-1]))
 				break
 			case "border":
 				border, _ := strconv.Atoi(propertyValue)

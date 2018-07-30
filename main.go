@@ -4,17 +4,27 @@ import (
 	"io/ioutil"
 	"fmt"
 	"cml/Parser"
-	//"github.com/k0kubun/pp"
+	"github.com/k0kubun/pp"
+	"os"
 	"cml/Renderer"
 )
 
 func main() {
-	cml, err := ioutil.ReadFile("ex1.cml") // just pass the file name
+	argsWithProg := os.Args
+	var debug = false
+	if len(argsWithProg) > 1 && argsWithProg[1] == "--debug" {
+		debug = true
+	}
+
+	cml, err := ioutil.ReadFile("ex1.cml")
 	if err != nil {
 		fmt.Print(err)
 	}
 
 	var cmlTree = Parser.ParseString(string(cml))
-	Renderer.PaintGui(cmlTree)
-	//pp.Println(cmlTree)
+	if debug {
+		pp.Println(cmlTree)
+	} else {
+		Renderer.PaintGui(cmlTree)
+	}
 }
