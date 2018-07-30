@@ -5,6 +5,7 @@ import (
 	"strings"
 	"strconv"
 	"reflect"
+	"github.com/jroimartin/gocui"
 )
 
 func ParseString(cml string) []*BlockTypes.Block {
@@ -54,7 +55,7 @@ func getRowParameters(row string) []string {
 		if propertySplitted[0] == "text" {
 			var lastSymbol = propertySplitted[1][len(propertySplitted[1])-1]
 			if lastSymbol != 34 {
-				concattedText = param + " "
+				concattedText = removeEscaping(param) + " "
 				continue
 			}
 		}
@@ -63,12 +64,14 @@ func getRowParameters(row string) []string {
 			formattedParams = append(formattedParams, param)
 		} else {
 			var lastSymbol = param[len(param)-1]
-			if lastSymbol == 34 {
-				concattedText += param
+			var penultimateSymbol = param[len(param)-2]
+
+			if lastSymbol == 34 && penultimateSymbol != 92 {
+				concattedText += removeEscaping(param)
 				formattedParams = append(formattedParams, concattedText)
 				concattedText = ""
 			} else {
-				concattedText += param + " "
+				concattedText += removeEscaping(param) + " "
 			}
 		}
 	}
@@ -109,6 +112,12 @@ func parseProperties(properties []string, rowNumber int) *BlockTypes.Block {
 			case "border":
 				border, _ := strconv.Atoi(propertyValue)
 				block.SetBorder(border)
+				break
+			case "bg-color":
+				block.SetBgColor(detectColor(propertyValue))
+				break
+			case "fg-color":
+				block.SetFgColor(detectColor(propertyValue))
 				break
 			default:
 				panic("Unknown property " + propertyName + " on line " + strconv.Itoa(rowNumber))
@@ -152,4 +161,31 @@ func inArray(val interface{}, array interface{}) (exists bool, index int) {
 	}
 
 	return
+}
+
+func detectColor(color string) gocui.Attribute {
+	switch color {
+	case "red":
+		return gocui.ColorRed
+	case "black":
+		return gocui.ColorBlack
+	case "green":
+		return gocui.ColorGreen
+	case "yellow":
+		return gocui.ColorYellow
+	case "blue":
+		return gocui.ColorBlue
+	case "magenta":
+		return gocui.ColorMagenta
+	case "cyan":
+		return gocui.ColorCyan
+	case "white":
+		return gocui.ColorWhite
+	}
+
+	return 0
+}
+
+func removeEscaping(str string) string {
+	return strings.Replace(str, `\"`, `"`, -1)
 }

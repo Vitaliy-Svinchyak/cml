@@ -6,6 +6,12 @@ import (
 	"strconv"
 )
 
+type Styled interface {
+	SetBorder(border int)
+	SetBgColor(color gocui.Attribute)
+	SetFgColor(color gocui.Attribute)
+}
+
 type Located interface {
 	SetWidth(width string)
 	SetRow(row int)
@@ -17,16 +23,17 @@ type Identifying interface {
 }
 
 type Block struct {
-	Id          string
-	Text        string
-	Width       string
-	Height      string
-	Row         int
-	Col         int
-	Border      int
-	BorderColor string
-	Children    []*Block
-	Parent      *Block
+	Id       string
+	Text     string
+	Width    string
+	Height   string
+	Row      int
+	Col      int
+	Border   int
+	BgColor  gocui.Attribute
+	FgColor  gocui.Attribute
+	Children []*Block
+	Parent   *Block
 }
 
 func (b *Block) SetWidth(width string) {
@@ -69,6 +76,13 @@ func (b *Block) SetBorder(border int) {
 	b.Border = border
 }
 
+func (b *Block) SetBgColor(color gocui.Attribute) {
+	b.BgColor = color
+}
+func (b *Block) SetFgColor(color gocui.Attribute) {
+	b.FgColor = color
+}
+
 func (b Block) Layout(g *gocui.Gui) error {
 	v, err := g.SetView(b.Id, b.Col, b.Row, b.calcWidth(), b.calcHeight())
 	if err != nil {
@@ -80,6 +94,13 @@ func (b Block) Layout(g *gocui.Gui) error {
 			v.Frame = true
 		} else {
 			v.Frame = false
+		}
+
+		if b.BgColor != 0 {
+			v.BgColor = b.BgColor
+		}
+		if b.FgColor != 0 {
+			v.FgColor = b.FgColor
 		}
 
 		fmt.Fprint(v, b.Text)
