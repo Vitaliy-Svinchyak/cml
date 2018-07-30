@@ -5,10 +5,11 @@ import (
 	"strings"
 	"strconv"
 	"reflect"
+	//"fmt"
 )
 
-func ParseString(cml string) []BlockTypes.Block {
-	var cmlTree []BlockTypes.Block
+func ParseString(cml string) []*BlockTypes.Block {
+	var cmlTree []*BlockTypes.Block
 	var knownTypes = []string{"block"}
 
 	var rows = strings.Split(string(cml), "\n")
@@ -16,9 +17,14 @@ func ParseString(cml string) []BlockTypes.Block {
 	var lastElement *BlockTypes.Block
 
 	for rowNumber, row := range rows {
+		if row == "" {
+			continue
+		}
 		var nesting, row = detectNesting(row)
-		var rowParameters = strings.Split(row, " ")
-		var blockType = rowParameters[0]
+		var rowParameters = strings.Split(row, ",")
+		var typeAndFirstParam = strings.Split(rowParameters[0], " ")
+		rowParameters[0] = typeAndFirstParam[1]
+		var blockType = typeAndFirstParam[0]
 		var knownType, _ = inArray(blockType, knownTypes)
 		if !knownType {
 			panic("Unknown block type: " + blockType + " on line " + strconv.Itoa(rowNumber))
@@ -31,7 +37,7 @@ func ParseString(cml string) []BlockTypes.Block {
 		} else if nesting == lastNesting {
 			lastNesting = nesting
 			cmlTree = append(cmlTree, block)
-			lastElement = &cmlTree[len(cmlTree)-1]
+			lastElement = cmlTree[len(cmlTree)-1]
 		} else {
 			lastNesting = nesting
 			cmlTree = append(cmlTree, block)
@@ -41,8 +47,8 @@ func ParseString(cml string) []BlockTypes.Block {
 	return cmlTree
 }
 
-func parseProperties(properties []string, rowNumber int) BlockTypes.Block {
-	var block = BlockTypes.Block{}
+func parseProperties(properties []string, rowNumber int) *BlockTypes.Block {
+	var block = &BlockTypes.Block{}
 
 	for _, property := range properties {
 		var propertySplitted = strings.Split(property, ":")
@@ -55,21 +61,25 @@ func parseProperties(properties []string, rowNumber int) BlockTypes.Block {
 				block.SetWidth(propertyValue)
 				break
 			case "height":
-				block.Height = propertyValue
+				block.SetHeight(propertyValue)
 				break
 			case "id":
-				block.Id = propertyValue
+				block.SetId(propertyValue)
 				break
 			case "row":
-				i, _ := strconv.Atoi(propertyValue)
-				block.Row = i
+				row, _ := strconv.Atoi(propertyValue)
+				block.SetRow(row)
 				break
 			case "col":
-				i, _ := strconv.Atoi(propertyValue)
-				block.Col = i
+				col, _ := strconv.Atoi(propertyValue)
+				block.SetCol(col)
 				break
 			case "text":
-				block.Text = string([]rune(propertyValue)[1:len(propertyValue)])
+				block.SetText(string([]rune(propertyValue)[1:len(propertyValue) - 1]))
+				break
+			case "border":
+				border, _ := strconv.Atoi(propertyValue)
+				block.SetBorder(border)
 				break
 			default:
 				panic("Unknown property " + propertyName + " on line " + strconv.Itoa(rowNumber))

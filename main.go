@@ -4,7 +4,8 @@ import (
 	"io/ioutil"
 	"fmt"
 	"cml/Parser"
-	"github.com/k0kubun/pp"
+	//"github.com/k0kubun/pp"
+	"cml/Renderer"
 )
 
 func main() {
@@ -14,5 +15,6 @@ func main() {
 	}
 
 	var cmlTree = Parser.ParseString(string(cml))
-	pp.Println(cmlTree)
+	Renderer.PaintGui(cmlTree)
+	//pp.Println(cmlTree)
 }
