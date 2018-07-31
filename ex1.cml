@@ -1,3 +1,4 @@
 block width:25pt height:2pt row:1 col:1 id:reg_title border:1 text:"Registration form" fg-color:green
 
-block width:45pt height:4pt row:3 col:40 id:reg_title2 text:"Some another \"text\" da" bg-color:magenta
+block width:50% height:12pt row:3 col:40 id:reg_title2 bg-color:magenta
+    block width:50% height:50% row:1 col:1 id:reg_title3 bg-color:red text:"Block in block" fg-color:black

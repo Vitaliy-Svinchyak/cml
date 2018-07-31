@@ -181,6 +181,8 @@ func detectColor(color string) gocui.Attribute {
 		return gocui.ColorCyan
 	case "white":
 		return gocui.ColorWhite
+	default:
+		panic("Unknown color " + color)
 	}
 
 	return 0

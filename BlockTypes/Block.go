@@ -4,6 +4,7 @@ import (
 	"github.com/jroimartin/gocui"
 	"fmt"
 	"strconv"
+	"cml/Config"
 )
 
 type Styled interface {
@@ -84,7 +85,7 @@ func (b *Block) SetFgColor(color gocui.Attribute) {
 }
 
 func (b Block) Layout(g *gocui.Gui) error {
-	v, err := g.SetView(b.Id, b.Col, b.Row, b.calcWidth(), b.calcHeight())
+	v, err := g.SetView(b.Id, b.CalcCol(), b.CalcRow(), b.CalcWidth(), b.CalcHeight())
 	if err != nil {
 		if err != gocui.ErrUnknownView {
 			return err
@@ -108,22 +109,59 @@ func (b Block) Layout(g *gocui.Gui) error {
 	return nil
 }
 
-func (b Block) calcWidth() int {
+func (b Block) CalcWidth() int {
 	if b.Width[len(b.Width)-1] == 37 {
-		// todo fix
-		return 20
+		var widthPercent, _ = strconv.Atoi(b.Width[0:len(b.Width)-1])
+		var availableWidth int
+
+		if b.Parent != nil {
+			var parentWidth = b.Parent.CalcWidth()
+			availableWidth = parentWidth - b.Parent.CalcCol()
+		} else {
+			availableWidth, _ = Config.GetTerminalSize()
+		}
+		var newWidth = availableWidth * widthPercent / 100
+
+		return b.CalcCol() + newWidth
 	}
 
 	var width, _ = strconv.Atoi(b.Width[0:len(b.Width)-2])
-	return b.Col + width
+
+	return b.CalcCol() + width
 }
 
-func (b Block) calcHeight() int {
+func (b Block) CalcHeight() int {
 	if b.Height[len(b.Height)-1] == 37 {
-		// todo fix
-		return 20
+		var heightPercent, _ = strconv.Atoi(b.Height[0:len(b.Height)-1])
+		var availableHeight int
+
+		if b.Parent != nil {
+			var parentHeight = b.Parent.CalcHeight()
+			availableHeight = parentHeight - b.Parent.CalcRow()
+		} else {
+			availableHeight, _ = Config.GetTerminalSize()
+		}
+		var newHeight = availableHeight * heightPercent / 100
+
+		return b.CalcRow() + newHeight
 	}
 
 	var height, _ = strconv.Atoi(b.Height[0:len(b.Height)-2])
-	return b.Row + height
+	return b.CalcRow() + height
+}
+
+func (b Block) CalcCol() int {
+	if b.Parent != nil {
+		return b.Parent.CalcCol() + b.Col
+	}
+
+	return b.Col
+}
+
+func (b Block) CalcRow() int {
+	if b.Parent != nil {
+		return b.Parent.CalcRow() + b.Row
+	}
+
+	return b.Row
 }
