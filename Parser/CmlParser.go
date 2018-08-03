@@ -8,8 +8,11 @@ import (
 	"github.com/jroimartin/gocui"
 )
 
-func ParseString(cml string) []*BlockTypes.Block {
+func ParseString(cml string) ([]*BlockTypes.Block, []*BlockTypes.Block) {
+	var blocksById = make(map[string]*BlockTypes.Block)
+	var lastBlockOnNesting []*BlockTypes.Block
 	var cmlTree []*BlockTypes.Block
+	var cmlSlice []*BlockTypes.Block
 	var knownTypes = []string{"block"}
 
 	var rows = strings.Split(string(cml), "\n")
@@ -32,17 +35,41 @@ func ParseString(cml string) []*BlockTypes.Block {
 		if nesting > lastNesting {
 			block.Parent = lastElement
 			lastElement.Children = append(lastElement.Children, block)
-		} else if nesting == lastNesting {
-			lastNesting = nesting
+			lastElement = block
+		} else if nesting == 0 {
 			cmlTree = append(cmlTree, block)
 			lastElement = cmlTree[len(cmlTree)-1]
+		} else if nesting < lastNesting {
+			var parent = lastBlockOnNesting[nesting-1]
+			block.Parent = parent
+			parent.Children = append(parent.Children, block)
+			lastElement = block
+		} else if nesting == lastNesting {
+			var parent = lastBlockOnNesting[nesting-1]
+			block.Parent = parent
+			parent.Children = append(parent.Children, block)
+			lastElement = block
 		} else {
-			lastNesting = nesting
 			cmlTree = append(cmlTree, block)
+		}
+
+		lastNesting = nesting
+		if len(lastBlockOnNesting) < nesting+1 {
+			lastBlockOnNesting = append(lastBlockOnNesting, block)
+		} else {
+			lastBlockOnNesting[nesting] = block
+		}
+		cmlSlice = append(cmlSlice, block)
+
+		if block.Id != "" {
+			if blocksById[block.Id] != nil {
+				panic("Block with Id:" + block.Id + " already exists." + "Duplicated id found on line " + strconv.Itoa(rowNumber))
+			}
+			blocksById[block.Id] = block
 		}
 	}
 
-	return cmlTree
+	return cmlSlice, cmlTree
 }
 
 func getRowParameters(row string) []string {
@@ -54,7 +81,7 @@ func getRowParameters(row string) []string {
 		var propertySplitted = strings.Split(param, ":")
 		if propertySplitted[0] == "text" {
 			var lastSymbol = propertySplitted[1][len(propertySplitted[1])-1]
-			if lastSymbol != 34 {
+			if (lastSymbol != 34 && len(propertySplitted[1]) > 1) || (lastSymbol == 34 && len(propertySplitted[1]) == 1) {
 				concattedText = removeEscaping(param) + " "
 				continue
 			}
@@ -63,8 +90,14 @@ func getRowParameters(row string) []string {
 		if len(concattedText) == 0 {
 			formattedParams = append(formattedParams, param)
 		} else {
+			var penultimateSymbol uint8
+			if len(param) == 0 || len(param) == 1 {
+				param = " "
+				penultimateSymbol = 32
+			} else {
+				penultimateSymbol = param[len(param)-2]
+			}
 			var lastSymbol = param[len(param)-1]
-			var penultimateSymbol = param[len(param)-2]
 
 			if lastSymbol == 34 && penultimateSymbol != 92 {
 				concattedText += removeEscaping(param)
@@ -99,10 +132,12 @@ func parseProperties(properties []string, rowNumber int) *BlockTypes.Block {
 				block.SetId(propertyValue)
 				break
 			case "row":
+				// allow % col
 				row, _ := strconv.Atoi(propertyValue)
 				block.SetRow(row)
 				break
 			case "col":
+				// allow % col
 				col, _ := strconv.Atoi(propertyValue)
 				block.SetCol(col)
 				break

@@ -1,4 +1,7 @@
-block width:25pt height:2pt row:1 col:1 id:reg_title border:1 text:"Registration form" fg-color:green
+block width:25pt height:2pt row:1 col:1 id:reg_title0 border:1 text:"Block with borders" fg-color:green
 
-block width:50% height:12pt row:3 col:40 id:reg_title2 bg-color:magenta
-    block width:50% height:50% row:1 col:1 id:reg_title3 bg-color:red text:"Block in block" fg-color:black
+block width:50% height:12pt row:3 col:40 id:reg_title0_1 bg-color:magenta
+    block width:50% height:50% row:1 col:40 id:reg_title1 bg-color:cyan fg-color:black text:" Some "
+    block width:50% height:50% row:1 col:1 id:reg_title1_1 bg-color:red fg-color:black
+        block width:50% height:50% row:1 col:1 id:reg_title2 bg-color:yellow text:"Block in block in block" fg-color:black
+    block width:50% height:50% row:5 col:1 id:reg_title1_2 bg-color:green fg-color:black text:"    Just block in block"

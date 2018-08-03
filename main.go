@@ -21,10 +21,10 @@ func main() {
 		fmt.Print(err)
 	}
 
-	var cmlTree = Parser.ParseString(string(cml))
+	var cmlSlice, cmlTree = Parser.ParseString(string(cml))
 	if debug {
 		pp.Println(cmlTree)
 	} else {
-		Renderer.PaintGui(cmlTree)
+		Renderer.PaintGui(cmlSlice)
 	}
 }
