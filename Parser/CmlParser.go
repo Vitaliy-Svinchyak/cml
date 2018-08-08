@@ -132,14 +132,10 @@ func parseProperties(properties []string, rowNumber int) *BlockTypes.Block {
 				block.SetId(propertyValue)
 				break
 			case "row":
-				// allow % col
-				row, _ := strconv.Atoi(propertyValue)
-				block.SetRow(row)
+				block.SetRow(propertyValue)
 				break
 			case "col":
-				// allow % col
-				col, _ := strconv.Atoi(propertyValue)
-				block.SetCol(col)
+				block.SetCol(propertyValue)
 				break
 			case "text":
 				block.SetText(string([]rune(propertyValue)[1:len(propertyValue)-1]))

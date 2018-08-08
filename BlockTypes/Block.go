@@ -28,8 +28,8 @@ type Block struct {
 	Text     string
 	Width    string
 	Height   string
-	Row      int
-	Col      int
+	Row      string
+	Col      string
 	Border   int
 	BgColor  gocui.Attribute
 	FgColor  gocui.Attribute
@@ -57,11 +57,11 @@ func (b *Block) SetHeight(height string) {
 	b.Height = height
 }
 
-func (b *Block) SetRow(row int) {
+func (b *Block) SetRow(row string) {
 	b.Row = row
 }
 
-func (b *Block) SetCol(row int) {
+func (b *Block) SetCol(row string) {
 	b.Col = row
 }
 
@@ -151,17 +151,39 @@ func (b Block) CalcHeight() int {
 }
 
 func (b Block) CalcCol() int {
-	if b.Parent != nil {
-		return b.Parent.CalcCol() + b.Col
+	var calculatedCol int
+	var currentCol = b.Col
+
+	if currentCol[len(currentCol)-1] == 37 {
+		var colPercent, _ = strconv.Atoi(b.Col[0:len(b.Col)-1])
+		var parentWidth = b.Parent.CalcWidth() - b.Parent.CalcCol()
+		calculatedCol = parentWidth * colPercent / 100
+	} else {
+		calculatedCol, _ = strconv.Atoi(currentCol)
 	}
 
-	return b.Col
+	if b.Parent != nil {
+		return b.Parent.CalcCol() + calculatedCol
+	}
+
+	return calculatedCol
 }
 
 func (b Block) CalcRow() int {
-	if b.Parent != nil {
-		return b.Parent.CalcRow() + b.Row
+	var calculatedRow int
+	var currentRow = b.Row
+
+	if currentRow[len(currentRow)-1] == 37 {
+		var rowPercent, _ = strconv.Atoi(b.Col[0:len(b.Col)-1])
+		var parentWidth = b.Parent.CalcHeight() - b.Parent.CalcRow()
+		calculatedRow = parentWidth * rowPercent / 100
+	} else {
+		calculatedRow, _ = strconv.Atoi(currentRow)
 	}
 
-	return b.Row
+	if b.Parent != nil {
+		return b.Parent.CalcRow() + calculatedRow
+	}
+
+	return calculatedRow
 }
