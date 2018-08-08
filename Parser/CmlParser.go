@@ -141,7 +141,13 @@ func parseProperties(properties []string, rowNumber int) *BlockTypes.Block {
 				block.SetText(string([]rune(propertyValue)[1:len(propertyValue)-1]))
 				break
 			case "border":
-				border, _ := strconv.Atoi(propertyValue)
+				border, err := strconv.Atoi(propertyValue)
+				if err != nil {
+					panic("Border " + propertyValue + " is not valid, on line " + strconv.Itoa(rowNumber))
+				}
+				if border != 1 && border != 0 {
+					panic("Border " + propertyValue + " is not valid, on line " + strconv.Itoa(rowNumber) + ". Border can be only 1 or 0(means true/false)")
+				}
 				block.SetBorder(border)
 				break
 			case "bg-color":

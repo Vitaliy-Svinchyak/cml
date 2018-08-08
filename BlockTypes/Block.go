@@ -38,7 +38,7 @@ type Block struct {
 }
 
 func (b *Block) SetWidth(width string) {
-	var matched = numberOrPercent(width)
+	var matched = ptOrPercent(width)
 
 	if !matched {
 		panic("Width " + width + " is not valid")
@@ -48,7 +48,7 @@ func (b *Block) SetWidth(width string) {
 }
 
 func (b *Block) SetHeight(height string) {
-	var matched = numberOrPercent(height)
+	var matched = ptOrPercent(height)
 
 	if !matched {
 		panic("Height " + height + " is not valid")
@@ -58,11 +58,23 @@ func (b *Block) SetHeight(height string) {
 }
 
 func (b *Block) SetRow(row string) {
+	var matched = numberOrPercent(row)
+
+	if !matched {
+		panic("Row " + row + " is not valid")
+	}
+
 	b.Row = row
 }
 
-func (b *Block) SetCol(row string) {
-	b.Col = row
+func (b *Block) SetCol(col string) {
+	var matched = numberOrPercent(col)
+
+	if !matched {
+		panic("Col " + col + " is not valid")
+	}
+
+	b.Col = col
 }
 
 func (b *Block) SetId(id string) {
