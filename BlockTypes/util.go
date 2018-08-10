@@ -5,7 +5,7 @@ import (
 	"math/rand"
 )
 
-func numberOrPercent(value string) bool {
+func nmPrKt(value string) bool {
 	matched, err := regexp.MatchString("^[0-9]+[%]|(kt)?$", value)
 
 	if err != nil {
@@ -15,7 +15,7 @@ func numberOrPercent(value string) bool {
 	return matched
 }
 
-func ptOrPercent(value string) bool {
+func ptPrKt(value string) bool {
 	matched, err := regexp.MatchString("^[0-9]+(pt)|(%)|(kt)$", value)
 
 	if err != nil {

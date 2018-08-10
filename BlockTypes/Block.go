@@ -66,6 +66,14 @@ func (b *Block) InitializeDefaultParams() {
 	if b.Id == "" {
 		b.SetId(RandStringRunes(32))
 	}
+
+	if b.Width == "" {
+		b.SetWidth("1pt")
+	}
+
+	if b.Height == "" {
+		b.SetHeight("1pt")
+	}
 }
 
 func (b Block) GetMetaInfo() map[string]int {

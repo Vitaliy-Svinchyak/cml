@@ -8,8 +8,7 @@ import (
 	"github.com/jroimartin/gocui"
 )
 
-func ParseString(cml string) ([]BlockTypes.Sheet, []BlockTypes.Sheet) {
-	var blocksById = make(map[string]BlockTypes.Sheet)
+func ParseString(cml string, document *Document) ([]BlockTypes.Sheet, []BlockTypes.Sheet) {
 	var lastBlockOnNesting []BlockTypes.Sheet
 	var cmlTree []BlockTypes.Sheet
 	var cmlSlice []BlockTypes.Sheet
@@ -57,8 +56,6 @@ func ParseString(cml string) ([]BlockTypes.Sheet, []BlockTypes.Sheet) {
 			block.SetParent(parent)
 			parent.AddChild(block)
 			lastElement = block
-		} else {
-			cmlTree = append(cmlTree, block)
 		}
 
 		lastNesting = nesting
@@ -69,11 +66,10 @@ func ParseString(cml string) ([]BlockTypes.Sheet, []BlockTypes.Sheet) {
 		}
 		cmlSlice = append(cmlSlice, block)
 
-		if block.GetId() != "" {
-			if blocksById[block.GetId()] != nil {
-				panic("Block with Id:" + block.GetId() + " already exists." + "Duplicated id found on line " + strconv.Itoa(rowNumber))
-			}
-			blocksById[block.GetId()] = block
+		var saveResult = document.saveId(block)
+
+		if saveResult == false {
+			panic("Block with Id:" + block.GetId() + " already exists." + "Duplicated id found on line " + strconv.Itoa(rowNumber))
 		}
 	}
 

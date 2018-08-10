@@ -20,7 +20,7 @@ func (b *Grid) SetCols(cols int) {
 }
 
 func (b *Grid) SetRow(row string) {
-	var matched = numberOrPercent(row)
+	var matched = nmPrKt(row)
 
 	if !matched {
 		panic("Row " + row + " is not valid")
@@ -30,7 +30,7 @@ func (b *Grid) SetRow(row string) {
 }
 
 func (b *Grid) SetCol(col string) {
-	var matched = numberOrPercent(col)
+	var matched = nmPrKt(col)
 
 	if !matched {
 		panic("Col " + col + " is not valid")
@@ -40,7 +40,7 @@ func (b *Grid) SetCol(col string) {
 }
 
 func (b *Grid) SetWidth(width string) {
-	var matched = ptOrPercent(width)
+	var matched = ptPrKt(width)
 
 	if !matched {
 		panic("Width " + width + " is not valid")
@@ -50,7 +50,7 @@ func (b *Grid) SetWidth(width string) {
 }
 
 func (b *Grid) SetHeight(height string) {
-	var matched = ptOrPercent(height)
+	var matched = ptPrKt(height)
 
 	if !matched {
 		panic("Height " + height + " is not valid")
@@ -75,6 +75,14 @@ func (b *Grid) InitializeDefaultParams() {
 	if b.Id == "" {
 		b.SetId(RandStringRunes(32))
 	}
+	if b.Width == "" {
+		b.SetWidth("1pt")
+	}
+
+	if b.Height == "" {
+		b.SetHeight("1pt")
+	}
+
 }
 
 func (b Grid) GetMetaInfo() map[string]int {

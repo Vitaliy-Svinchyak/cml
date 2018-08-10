@@ -41,7 +41,7 @@ func (b *AbstractSheet) GetChildren() []Sheet {
 }
 
 func (b *Block) SetWidth(width string) {
-	var matched = ptOrPercent(width)
+	var matched = ptPrKt(width)
 
 	if !matched {
 		panic("Width " + width + " is not valid")
@@ -51,7 +51,7 @@ func (b *Block) SetWidth(width string) {
 }
 
 func (b *Block) SetHeight(height string) {
-	var matched = ptOrPercent(height)
+	var matched = ptPrKt(height)
 
 	if !matched {
 		panic("Height " + height + " is not valid")
@@ -61,7 +61,7 @@ func (b *Block) SetHeight(height string) {
 }
 
 func (b *Block) SetRow(row string) {
-	var matched = numberOrPercent(row)
+	var matched = nmPrKt(row)
 
 	if !matched {
 		panic("Row " + row + " is not valid")
@@ -71,7 +71,7 @@ func (b *Block) SetRow(row string) {
 }
 
 func (b *Block) SetCol(col string) {
-	var matched = numberOrPercent(col)
+	var matched = nmPrKt(col)
 
 	if !matched {
 		panic("Col " + col + " is not valid")
