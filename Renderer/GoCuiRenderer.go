@@ -6,7 +6,7 @@ import (
 	"cml/Config"
 )
 
-func PaintGui(cmlTree []*BlockTypes.Block) {
+func PaintGui(cmlTree []BlockTypes.Sheet) {
 	g, err := gocui.NewGui(gocui.OutputNormal)
 	if err != nil {
 		panic(err)

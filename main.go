@@ -3,28 +3,20 @@ package main
 import (
 	"io/ioutil"
 	"fmt"
+	"time"
+	"math/rand"
 	"cml/Parser"
-	"github.com/k0kubun/pp"
-	"os"
-	"cml/Renderer"
 )
 
 func main() {
-	argsWithProg := os.Args
-	var debug = false
-	if len(argsWithProg) > 1 && argsWithProg[1] == "--debug" {
-		debug = true
-	}
+	rand.Seed(time.Now().UnixNano())
 
-	cml, err := ioutil.ReadFile("ex1.cml")
+	cml, err := ioutil.ReadFile("examples/ex2.cml")
 	if err != nil {
 		fmt.Print(err)
 	}
 
-	var cmlSlice, cmlTree = Parser.ParseString(string(cml))
-	if debug {
-		pp.Println(cmlTree)
-	} else {
-		Renderer.PaintGui(cmlSlice)
-	}
+	Parser.NewDocument(string(cml))
+	//var cmlSlice, cmlTree = Parser.ParseString(string(cml))
+	//	pp.Println(cmlTree)
 }

@@ -8,16 +8,15 @@ import (
 	"github.com/jroimartin/gocui"
 )
 
-func ParseString(cml string) ([]*BlockTypes.Block, []*BlockTypes.Block) {
-	var blocksById = make(map[string]*BlockTypes.Block)
-	var lastBlockOnNesting []*BlockTypes.Block
-	var cmlTree []*BlockTypes.Block
-	var cmlSlice []*BlockTypes.Block
-	var knownTypes = []string{"block"}
+func ParseString(cml string, document *Document) ([]BlockTypes.Sheet, []BlockTypes.Sheet) {
+	var lastBlockOnNesting []BlockTypes.Sheet
+	var cmlTree []BlockTypes.Sheet
+	var cmlSlice []BlockTypes.Sheet
+	var knownTypes = []string{"block", "grid"}
 
 	var rows = strings.Split(string(cml), "\n")
 	var lastNesting = 0
-	var lastElement *BlockTypes.Block
+	var lastElement BlockTypes.Sheet
 
 	for rowNumber, row := range rows {
 		if row == "" {
@@ -30,27 +29,33 @@ func ParseString(cml string) ([]*BlockTypes.Block, []*BlockTypes.Block) {
 		if !knownType {
 			panic("Unknown block type: " + blockType + " on line " + strconv.Itoa(rowNumber))
 		}
-		var block = parseProperties(rowParameters, rowNumber)
+		var block BlockTypes.Sheet
+
+		if blockType == "block" {
+			block = parseBlockProperties(rowParameters, rowNumber)
+		} else {
+			block = parseGridProperties(rowParameters, rowNumber)
+		}
+
+		block.InitializeDefaultParams()
 
 		if nesting > lastNesting {
-			block.Parent = lastElement
-			lastElement.Children = append(lastElement.Children, block)
+			block.SetParent(lastElement)
+			lastElement.AddChild(block)
 			lastElement = block
 		} else if nesting == 0 {
 			cmlTree = append(cmlTree, block)
 			lastElement = cmlTree[len(cmlTree)-1]
 		} else if nesting < lastNesting {
 			var parent = lastBlockOnNesting[nesting-1]
-			block.Parent = parent
-			parent.Children = append(parent.Children, block)
+			block.SetParent(parent)
+			parent.AddChild(block)
 			lastElement = block
 		} else if nesting == lastNesting {
 			var parent = lastBlockOnNesting[nesting-1]
-			block.Parent = parent
-			parent.Children = append(parent.Children, block)
+			block.SetParent(parent)
+			parent.AddChild(block)
 			lastElement = block
-		} else {
-			cmlTree = append(cmlTree, block)
 		}
 
 		lastNesting = nesting
@@ -61,11 +66,10 @@ func ParseString(cml string) ([]*BlockTypes.Block, []*BlockTypes.Block) {
 		}
 		cmlSlice = append(cmlSlice, block)
 
-		if block.Id != "" {
-			if blocksById[block.Id] != nil {
-				panic("Block with Id:" + block.Id + " already exists." + "Duplicated id found on line " + strconv.Itoa(rowNumber))
-			}
-			blocksById[block.Id] = block
+		var saveResult = document.saveId(block)
+
+		if saveResult == false {
+			panic("Block with Id:" + block.GetId() + " already exists." + "Duplicated id found on line " + strconv.Itoa(rowNumber))
 		}
 	}
 
@@ -112,7 +116,7 @@ func getRowParameters(row string) []string {
 	return formattedParams
 }
 
-func parseProperties(properties []string, rowNumber int) *BlockTypes.Block {
+func parseBlockProperties(properties []string, rowNumber int) *BlockTypes.Block {
 	var block = &BlockTypes.Block{}
 
 	for _, property := range properties {
@@ -155,6 +159,56 @@ func parseProperties(properties []string, rowNumber int) *BlockTypes.Block {
 				break
 			case "fg-color":
 				block.SetFgColor(detectColor(propertyValue))
+				break
+			default:
+				panic("Unknown property " + propertyName + " on line " + strconv.Itoa(rowNumber))
+			}
+		}
+	}
+
+	return block
+}
+
+func parseGridProperties(properties []string, rowNumber int) *BlockTypes.Grid {
+	var block = &BlockTypes.Grid{}
+
+	for _, property := range properties {
+		var propertySplitted = strings.Split(property, ":")
+		if len(propertySplitted) == 2 {
+			var propertyName = propertySplitted[0]
+			var propertyValue = propertySplitted[1]
+
+			switch propertyName {
+			case "width":
+				block.SetWidth(propertyValue)
+				break
+			case "height":
+				block.SetHeight(propertyValue)
+				break
+			case "id":
+				block.SetId(propertyValue)
+				break
+			case "row":
+				block.SetRow(propertyValue)
+				break
+			case "col":
+				block.SetCol(propertyValue)
+				break
+			case "rows":
+				var value, err = strconv.Atoi(propertyValue)
+				if err != nil {
+					panic("Invalid value " + propertyValue + " on line " + strconv.Itoa(rowNumber))
+				}
+
+				block.SetRows(value)
+				break
+			case "cols":
+				var value, err = strconv.Atoi(propertyValue)
+				if err != nil {
+					panic("Invalid value " + propertyValue + " on line " + strconv.Itoa(rowNumber))
+				}
+
+				block.SetCols(value)
 				break
 			default:
 				panic("Unknown property " + propertyName + " on line " + strconv.Itoa(rowNumber))
